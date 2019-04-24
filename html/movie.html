@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Zomovie</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/movies.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand navbar-dark bg-dark">
+        <div class="navbar-header" style="padding-right:50px">
+            <a class="navbar-brand" href="#">Zomovie</a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link" style="padding-right:50px" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="shows.html" style="padding-right:50px">Shows</a></li>
+                <li class="nav-item"><a class="nav-link" href="movies.html" style="padding-right:50px">Movies</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="jumbotron">
+            <div id="movieDetails"></div>
+        </div>
+        <div class="jumbotron">
+            <div id="shows"></div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(() => {
+            if (window.localStorage.getItem('token') === null) {
+                $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='login.html';">Login / Register</button>`);
+            } else {
+                $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='login.html';">Logout</button>`);
+            }
+
+            const id = window.localStorage.getItem('movie_id');
+            window.localStorage.removeItem('movie_id');
+            displayMovie(id);
+            setShows(id);
+        });
+
+        displayMovie = (id) => {
+            $.getJSON(`http://localhost:8000/api/movies/${id}`, (data) => {
+                $('#movieDetails').append(`<div class="row">
+                                                <div class="col-8">
+                                                    <img class="card-img-top d-flex align-items-stretch" src="${data.backdrop_url}" alt="Card image cap">
+                                                </div>
+                                                <div class="col-4">
+                                                    <h2>${data.name}</h2> <br>
+                                                    <p>${data.plot}</p>
+                                                    <h6>IMDB - ${(data.rating == 0) ? data.rating : "N/A"} <b style="padding-left:15px;">U/A</b> </h6>
+                                                    <h6>Runtime: ${convertToHours(data.duration)}</h6>
+                                                </div>
+                                             </div>`);
+            });
+        }
+
+        setShows = (id) => {
+            $.getJSON(`http://localhost:8000/api/shows/movie/${id}`, (data) => {
+                let prevDate = null;
+                let parent = ``;
+                for (let i = 0; i < data.length; i++) {
+                    let actualDate = new Date(data[i].start_time);
+                    let date = new Date(actualDate.toLocaleDateString());
+                    let time = roundTime(`${actualDate.getHours()}:${actualDate.getMinutes()}`, 15);
+
+                    if (i == 0) {
+                        parent += `<div class="row">`;
+                        parent += `<div class="col-2">`;
+                        parent += `<h5> ${actualDate.toLocaleDateString()} <h5/>`;
+                        parent += `</div>`;
+                        parent += `<div class="col-10">`;
+                    } else if (date > prevDate) {
+                        parent += `</div>`;
+                        parent += `</div>`;
+                        parent += `<br>`;
+                        parent += `<div class="row">`;
+                        parent += `<div class="col-2">`;
+                        parent += `<h5> ${actualDate.toLocaleDateString()} <h5/>`;
+                        parent += `</div>`;
+                        parent += `<div class="col-10">`;
+                    }
+                    parent += `<button type="button" class="btn btn-outline-danger">${time}</button>`;
+                    prevDate = date;
+                }
+                parent += `</div>`;
+                console.log(parent);
+                $('#shows').append(parent);
+            });
+        }
+
+        convertToHours = (n) => {
+            var num = n;
+            var hours = (num / 60);
+            var rhours = Math.floor(hours);
+            var minutes = (hours - rhours) * 60;
+            var rminutes = Math.round(minutes);
+            return rhours + " hours and " + rminutes + " minutes.";
+        }
+
+        roundTime = (time, minutesToRound) => {
+
+            let [hours, minutes] = time.split(':');
+            hours = parseInt(hours);
+            minutes = parseInt(minutes);
+            time = (hours * 60) + minutes;
+
+            let rounded = Math.round(time / minutesToRound) * minutesToRound;
+            let rHr = '' + Math.floor(rounded / 60)
+            let rMin = '' + rounded % 60
+
+            return rHr.padStart(2, '0') + ':' + rMin.padStart(2, '0')
+        }
+
+    </script>
+
+</body>
+
+</html>

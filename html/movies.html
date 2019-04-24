@@ -24,14 +24,15 @@
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item"><a class="nav-link" style="padding-right:50px" href="index.html">Home</a></li>
                 <li class="nav-item"><a class="nav-link" href="shows.html" style="padding-right:50px">Shows</a></li>
-                <li class="nav-item active"><a class="nav-link" href="movies.html" style="padding-right:50px">Movies</a></li>
+                <li class="nav-item active"><a class="nav-link" href="movies.html" style="padding-right:50px">Movies</a>
+                </li>
             </ul>
         </div>
     </nav>
 
     <div class="container">
         <div class="jumbotron">
-            <div class="card-columns" id="movies">
+            <div id="movies">
             </div>
         </div>
 
@@ -44,7 +45,14 @@
             $.getJSON(`http://localhost:8000/api/movies?page=${page}`, (data) => {
                 $("#movies").empty();
                 $(".pagination").empty();
+                let parent = `<div class="row">`;
                 for (let i = 0; i < data.length; i++) {
+
+                    if (i > 0 && i % 5 == 0) {
+                        parent += `</div>`;
+                        parent += `<div class="row">`
+                    }
+
                     let rating = Math.round(data[i].rating / 2);
                     let j = 0;
                     let ratingString = ``;
@@ -54,18 +62,25 @@
                     for (; j < 5; j++) {
                         ratingString += '<span class="fa fa-star-empty"></span>';
                     }
-                    const html = `<div class="card" style="max-width: 18rem;">
-                                    <img class="card-img-top" src="${data[i].poster_url}" alt="Card image cap">
-                                    <div class="card-body text-center">
-                                        <h5 class="card-title">${data[i].name}</h5>
-                                        <div class="rating">
-                                            ${ratingString}
+                    const html = `<div class="col">
+                                    <div class="card">
+                                        <img class="card-img-top d-flex align-items-stretch" src="${data[i].poster_url}" alt="Card image cap">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title">${data[i].name}</h6>
+                                            <div class="rating">
+                                                ${ratingString}
+                                            </div>
+                                            <a href="javascript:goToTheMovie(${data[i].id})" class="btn btn-danger" id="${data[i].id}">Book</a>
                                         </div>
-                                        <a href="#" class="btn btn-danger">Book</a>
                                     </div>
                                 </div>`;
-                    $("#movies").append(html);
+                    parent += html;
+                    if (i == data.length - 1) {
+                        parent += `</div>`;
+                    }
                 }
+
+                $("#movies").append(parent);
 
                 if (page == 0) {
                     $(".pagination").append(`<li class="page-item disabled"><a class="page-link" href="javascript:getPreviousPage();"> Previous </a></li>
@@ -78,13 +93,19 @@
         }
 
         $(document).ready(() => {
-            if(window.localStorage.getItem('token') === null){
+            if (window.localStorage.getItem('token') === null) {
                 $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='login.html';">Login / Register</button>`);
-            }else{
+            } else {
                 $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='login.html';">Logout</button>`);
             }
             getMovies();
         });
+
+        goToTheMovie = (id) => {
+            console.log(id);
+            window.localStorage.setItem('movie_id', id);
+            window.location.replace("movie.html");
+        }
 
         getNextPage = () => {
             page++;
