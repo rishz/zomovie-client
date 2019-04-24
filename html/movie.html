@@ -43,7 +43,7 @@
             if (window.localStorage.getItem('token') === null) {
                 $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='login.html';">Login / Register</button>`);
             } else {
-                $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='login.html';">Logout</button>`);
+                $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='logout.html';">Logout</button>`);
             }
 
             const id = window.localStorage.getItem('movie_id');
@@ -93,13 +93,20 @@
                         parent += `</div>`;
                         parent += `<div class="col-10">`;
                     }
-                    parent += `<button type="button" class="btn btn-outline-danger">${time}</button>`;
+
+                    parent += `<button onclick="bookTheShow(this.id)" id=${data[i].id} type="button" class="btn btn-outline-danger">${time}</button>`;
                     prevDate = date;
                 }
                 parent += `</div>`;
-                console.log(parent);
+
                 $('#shows').append(parent);
             });
+        }
+
+        bookTheShow = (id) => {
+            console.log(id);
+            window.localStorage.setItem('show_id', id);
+            window.location.replace("show.html");
         }
 
         convertToHours = (n) => {

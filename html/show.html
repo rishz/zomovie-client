@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Zomovie</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/movies.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand navbar-dark bg-dark">
+        <div class="navbar-header" style="padding-right:50px">
+            <a class="navbar-brand" href="#">Zomovie</a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link" style="padding-right:50px" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="shows.html" style="padding-right:50px">Shows</a></li>
+                <li class="nav-item"><a class="nav-link" href="movies.html" style="padding-right:50px">Movies</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div id="error"></div>
+
+    <div class="container">
+        <div class="jumbotron">
+            <div id="showDetails"></div>
+        </div>
+        <div class="jumbotron">
+            <div id="bookMovie">
+                <form name="ticketsForm" id="ticketsForm" action="#" method="POST">
+                    <div class="form-group">
+                        <label for="seats">Select Number of tickets</label>
+                        <select class="form-control" id="numTickets" name="numTickets" required>
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                            <option>9</option>
+                            <option>10</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-danger">Pay</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="jumbotron">
+            <div id="myTicket">
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        $(document).ready(() => {
+            if (window.localStorage.getItem('token') === null) {
+                $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='login.html';">Login / Register</button>`);
+                window.location.replace("login.html");
+            }
+
+            const id = window.localStorage.getItem('show_id');
+            if (id === null) return;
+            window.localStorage.removeItem('show_id');
+            displayShow(id);
+
+            $("#ticketsForm").submit((e) => {
+                e.preventDefault();
+                $("#error").empty();
+
+                var $inputs = $('#ticketsForm :input');
+                var values = {};
+                $inputs.each(function () {
+                    values[this.name] = $(this).val();
+                });
+
+                console.log(`Bearer ${window.localStorage.getItem('token')}`);
+
+                $.ajax({
+                    type: 'POST',
+                    beforeSend: (request) => {
+                        request.setRequestHeader("Authorization", `Bearer ${window.localStorage.getItem('token')}`);
+                    },
+                    url: 'http://localhost:8000/api/booking',
+                    data: JSON.stringify({
+                        "show_id": id,
+                        "tickets": values['numTickets']
+                    }),
+                    success: (data) => {
+                        $('#myTicket').append(`<h2> Ticket Confirmed! ID - <b> ${data.booking_id} </b></h2>`);
+                    },
+                    error: (err) => {
+                        console.log(err);
+                        $('#error').append(`<div class="alert alert-danger" role="alert">
+                                                ${err.responseJSON.error}
+                                            </div>`);
+                    },
+                    contentType: "application/json",
+                    dataType: 'json'
+                });
+            });
+        });
+
+        displayShow = (id) => {
+            $.getJSON(`http://localhost:8000/api/shows/${id}`, (data) => {
+                console.log(data);
+                const start = new Date(data.start_time);
+                const end = new Date(data.end_time);
+                $('#showDetails').append(`<div class="row">
+                                                <div class="col">
+                                                    <h4>Movie Start time: <b>${start.toString()}</b></h4> <br>
+                                                    <h4>Movie End time: <b>${end.toString()}</b></h4> <br>
+                                                    <h4>Movie Tickets left: <b>${data.count_tickets}</b></h4> <br>
+                                                </div>
+                                             </div>`);
+            });
+        }
+    </script>
+
+</body>
+
+</html>
