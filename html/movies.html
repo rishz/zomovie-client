@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Zomovie</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/movies.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand navbar-dark bg-dark">
+        <div class="navbar-header" style="padding-right:50px">
+            <a class="navbar-brand" href="#">Zomovie</a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link" style="padding-right:50px" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="shows.html" style="padding-right:50px">Shows</a></li>
+                <li class="nav-item active"><a class="nav-link" href="movies.html" style="padding-right:50px">Movies</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="jumbotron">
+            <div class="card-columns" id="movies">
+            </div>
+        </div>
+
+        <ul class="pagination justify-content-center"></ul>
+    </div>
+
+    <script>
+        let page = 0;
+        const getMovies = () => {
+            $.getJSON(`http://localhost:8000/api/movies?page=${page}`, (data) => {
+                $("#movies").empty();
+                $(".pagination").empty();
+                for (let i = 0; i < data.length; i++) {
+                    let rating = Math.round(data[i].rating / 2);
+                    let j = 0;
+                    let ratingString = ``;
+                    for (; j < rating; j++) {
+                        ratingString += '<span class="fa fa-star"></span>';
+                    }
+                    for (; j < 5; j++) {
+                        ratingString += '<span class="fa fa-star-empty"></span>';
+                    }
+                    const html = `<div class="card" style="max-width: 18rem;">
+                                    <img class="card-img-top" src="${data[i].poster_url}" alt="Card image cap">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">${data[i].name}</h5>
+                                        <div class="rating">
+                                            ${ratingString}
+                                        </div>
+                                        <a href="#" class="btn btn-danger">Book</a>
+                                    </div>
+                                </div>`;
+                    $("#movies").append(html);
+                }
+
+                if (page == 0) {
+                    $(".pagination").append(`<li class="page-item disabled"><a class="page-link" href="javascript:getPreviousPage();"> Previous </a></li>
+                                         <li class="page-item"><a class="page-link" href="javascript:getNextPage();">Next</a></li>`);
+                } else {
+                    $(".pagination").append(`<li class="page-item"><a class="page-link" href="javascript:getPreviousPage();"> Previous </a></li>
+                                         <li class="page-item"><a class="page-link" href="javascript:getNextPage();">Next</a></li>`);
+                }
+            });
+        }
+
+        $(document).ready(() => {
+            if(window.localStorage.getItem('token') === null){
+                $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='login.html';">Login / Register</button>`);
+            }else{
+                $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='login.html';">Logout</button>`);
+            }
+            getMovies();
+        });
+
+        getNextPage = () => {
+            page++;
+            console.log(page);
+            getMovies();
+        }
+        getPreviousPage = () => {
+            page--;
+            getMovies();
+        }
+    </script>
+
+</body>
+
+</html>

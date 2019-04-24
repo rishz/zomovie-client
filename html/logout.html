@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Zomovie</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/movies.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand navbar-dark bg-dark">
+        <div class="navbar-header" style="padding-right:50px">
+            <a class="navbar-brand" href="#">Zomovie</a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link" style="padding-right:50px" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="shows.html" style="padding-right:50px">Shows</a></li>
+                <li class="nav-item"><a class="nav-link" href="movies.html" style="padding-right:50px">Movies</a></li>
+            </ul>
+            <button class="btn btn-danger navbar-btn pull-right" href="login.html">Login / Register</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="jumbotron" id="status">
+    </div>
+
+    <script>
+        $(document).ready(() => {
+            window.localStorage.removeItem('token');
+            $("#status").append(`<div class="alert alert-info" role="alert">
+                                        You have been logged out successfully.
+                                </div>`);
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Zomovie</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/movies.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand navbar-dark bg-dark">
+        <div class="navbar-header" style="padding-right:50px">
+            <a class="navbar-brand" href="#">Zomovie</a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link" style="padding-right:50px" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="shows.html" style="padding-right:50px">Shows</a></li>
+                <li class="nav-item"><a class="nav-link" href="movies.html" style="padding-right:50px">Movies</a></li>
+            </ul>
+            <button class="btn btn-danger navbar-btn pull-right" href="login.html">Login / Register</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="jumbotron">
+
+            <div id="error"></div>
+
+            <div class="row">
+                <div class="col-6">
+                    <h2>Login</h2>
+                    <form name="loginForm" id="loginForm" action="#" method="POST">
+                        <div class="form-group">
+                            <label for="email">Email address: </label>
+                            <input type="email" name="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pwd">Password: </label>
+                            <input type="password" name="password" class="form-control" id="pwd" required maxlength="20"
+                                minlength="5">
+                        </div>
+                        <button type="submit" class="btn btn-danger">Login</button>
+                    </form>
+                </div>
+                <div class="col-6">
+                    <h2>Register</h2>
+                    <form name="registerForm" id="registerForm" action="#" method="POST">
+                        <div class="form-group">
+                            <label for="email">Email address: </label>
+                            <input type="email" name="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="form-group" action="">
+                            <label for="pwd">Password: </label>
+                            <input type="password" name="password" class="form-control" id="pwd" required maxlength="20" minlength="5">
+                        </div>
+                        <div class="form-group">
+                            <label>First name: </label>
+                            <input type="first_name" name="first_name" class="form-control" id="first_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name: </label>
+                            <input type="last_name" name="last_name" class="form-control" id="last_name" required>
+                        </div>
+                        <div class="form-group">
+                                <label>Birth Date: </label>
+                                <input type="date" name="birth_date" class="form-control" id="birth_date" required>
+                        </div>    
+                        <button type="submit" class="btn btn-danger">Register</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        $(document).ready(() => {
+            $("#loginForm").submit((e) => {
+                e.preventDefault();
+                $("#error").empty();
+
+                var $inputs = $('#loginForm :input');
+                var values = {};
+                $inputs.each(function () {
+                    values[this.name] = $(this).val();
+                });
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'http://localhost:8000/api/users/login',
+                    data: JSON.stringify({
+                        "email": values['email'],
+                        "password": values['password']
+                    }),
+                    success: (data) => { 
+                        window.localStorage.setItem('token', data.token);
+                        window.location.replace("index.html");
+                    },
+                    error: (err) => {
+                        $('#error').append(`<div class="alert alert-danger" role="alert">
+                                                ${err.responseJSON.error}
+                                            </div>`);
+                    },
+                    contentType: "application/json",
+                    dataType: 'json'
+                });
+            });
+
+            $("#registerForm").submit((e) => {
+                e.preventDefault();
+                $("#error").empty();
+                
+                var $inputs = $('#registerForm :input');
+                var values = {};
+                $inputs.each(function () {
+                    values[this.name] = $(this).val();
+                });
+                console.log(values);
+                $.ajax({
+                    type: 'POST',
+                    url: 'http://localhost:8000/api/users/register',
+                    data: JSON.stringify({
+                        "email": values['email'],
+                        "password": values['password'],
+                        "first_name": values['first_name'],
+                        "last_name": values['last_name'],
+                        "birth_date": values['birth_date']
+                    }),
+                    success: (data) => { 
+                        $('#error').append(`<div class="alert alert-success" role="alert">
+                                                Registration successful! Please login.
+                                            </div>`);
+                        
+                        $("#registerForm").trigger("reset");
+                    },
+                    error: (err) => {
+                        $('#error').append(`<div class="alert alert-danger" role="alert">
+                                                ${err.responseJSON.error}
+                                            </div>`);
+                    },
+                    contentType: "application/json",
+                    dataType: 'json'
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>
