@@ -46,7 +46,7 @@
                         <h4 class="text-center"> Movie </h4>
                     </div>
                     <div class="col-2">
-                        <h4 class="text-center"> Number of Tickets </h4>
+                        <h4 class="text-center"> Seats </h4>
                     </div>
                     <div class="col-3">
                         <h4 class="text-center"> Booking Date </h4>
@@ -92,7 +92,7 @@
                                                     <h4 class="text-center"> Email ID: </h4>
                                                 </div>
                                                 <div class="col">
-                                                    <h4 class="text-center"><b> r${data.email} </b> </h4>
+                                                    <h4 class="text-center"><b> ${data.email} </b> </h4>
                                                 </div>
                                             </div>
                                             <div class="row">
@@ -131,7 +131,7 @@
                                                     <h6 class="text-center"> ${data[i].movie} </h6>
                                                 </div>
                                                 <div class="col-2">
-                                                    <h6 class="text-center"> ${data[i].count_tickets} </h6>
+                                                    <h6 class="text-center"> ${getSeats(data[i].seats)} </h6>
                                                 </div>
                                                 <div class="col-3">
                                                     <h6 class="text-center"> ${time.toLocaleString()} </h6>
@@ -145,6 +145,23 @@
                 contentType: "application/json",
                 dataType: 'json'
             });
+        }
+
+        getSeats = (seats) => {
+            returnStr = '';
+            for(let i=0; i<seats.length; i++){
+                returnStr+=getSeatName(seats[i])+' ';
+            }
+            return returnStr;
+        }
+
+        getSeatName = (n) => {
+            let d = parseInt(n / 10);
+            let seat = '';
+            seat += (String.fromCharCode(65 + d));
+            let m = n % 10;
+            seat += m;
+            return seat;
         }
 
     </script>

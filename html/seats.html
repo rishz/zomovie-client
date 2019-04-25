@@ -37,7 +37,7 @@
         </div>
         <div class="jumbotron">
             <div id="bookSeats">
-                <button class="btn btn-outline-danger" onclick="bookSeats()"> Pay </button>
+                <button class="btn btn-outline-danger" id="pay" onclick="bookSeats()"> Pay </button>
             </div>
         </div>
 
@@ -143,6 +143,7 @@
                     for(let i=0; i<100; i++){
                         $(`#${i}`).prop('disabled', true);
                     }
+                    $(`#pay`).prop('disabled', true);
                 },
                 error: (err) => {
                     console.log(err);
