@@ -33,12 +33,12 @@
 
     <div class="container">
         <div class="jumbotron">
-            <div id="showDetails"></div>
-            <div id="nextStep"></div>
+            <h1 class="justify-content-center"> Select seats </h1>
+            <div id="seats">
+            </div>
         </div>
-        
         <div class="jumbotron">
-            <div id="myTicket">
+            <div id="bookMovie">
 
             </div>
         </div>
@@ -46,20 +46,20 @@
 
     <script>
 
+        let seats = new Array(100);
         $(document).ready(() => {
             if (window.localStorage.getItem('token') === null) {
-                $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='login.html';">Login / Register</button>`);
                 window.location.replace("login.html");
             }
+
             $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='logout.html';">Logout</button>`);
             $('#navbarChild').append(`<li class="nav-item"><a class="nav-link" href="profile.html" style="padding-right:50px">Profile</a></li>`);
+
 
             const id = window.localStorage.getItem('show_id');
             if (id === null) return;
             window.localStorage.removeItem('show_id');
-            displayShow(id);
-
-            $("#nextStep").append(`<button class="btn btn-outline-danger" id=${id} onclick="next(this.id)"> Next </button>`);
+            displaySeats(id);
 
             // $("#ticketsForm").submit((e) => {
             //     e.preventDefault();
@@ -98,25 +98,68 @@
             // });
         });
 
-        displayShow = (id) => {
-            $.getJSON(`http://localhost:8000/api/shows/${id}`, (data) => {
-                console.log(data);
-                const start = new Date(data.start_time);
-                const end = new Date(data.end_time);
-                $('#showDetails').append(`<div class="row">
-                                                <div class="col">
-                                                    <h4>Movie Start time: <b>${start.toString()}</b></h4> <br>
-                                                    <h4>Movie End time: <b>${end.toString()}</b></h4> <br>
-                                                    <h4>Movie Tickets left: <b>${data.count_tickets}</b></h4> <br>
-                                                </div>
-                                             </div>`);
+        displaySeats = (id) => {
+            console.log('id == ' + id);
+            $.ajax({
+                type: 'GET',
+                beforeSend: (request) => {
+                    request.setRequestHeader("Authorization", `Bearer ${window.localStorage.getItem('token')}`);
+                },
+                url: `http://localhost:8000/api/seats/${id}`,
+                success: (data) => {
+                    booked = data.booked.split('');
+                    pending = data.pending.split('');
+                    let parent = '';
+                    for (let i = 0; i < booked.length; i++) {
+                        if (i % 10 == 0) {
+                            if (i > 0) {
+                                parent += '</div><br>';
+                                $('#seats').append(parent);
+                            }
+                            parent = '<div class="row">';
+                        }
+                        if (booked[i] == '1' || pending[i] == '1') {
+                            parent += ` <div class="col">
+                                            <button type="button" id="${i}" class="btn btn-outline-secondary active" width="2px" height="2px">${getSeatName(i)}</button>
+                                        </div>`;
+                            seats[i] = 1;
+                        } else {
+                            parent += ` <div class="col">
+                                            <button type="button" id="${i}"  onclick="selectSeat(${i})" class="btn btn-outline-danger" data-toggle="button" width="2px" height="2px">${getSeatName(i)}</button>
+                                        </div>`;
+                            seats[i] = 0;
+                        }
+                    }
+                    parent += '</div>';
+                    $('#seats').append(parent);
+                },
+                error: (err) => {
+                    console.log(err);
+                },
+                contentType: "application/json",
+                dataType: 'json'
             });
         }
 
-        next = (id) => {
-            console.log(id);
-            window.localStorage.setItem('show_id', id);
-            window.location.replace("seats.html");
+        getSeatName = (n) => {
+            let d = parseInt(n / 10);
+            let seat = '';
+            seat += (String.fromCharCode(65 + d));
+            let m = n % 10;
+            seat += m;
+            return seat;
+        }
+
+        selectSeat = (i) => {
+            seats[i] = 1-seats[i];
+        }
+
+        bookSeats = (n) => {
+            let str = '';
+            for (let i = 0; i < seats.length; i++) {
+                str += seats[i];
+            }
+            
         }
     </script>
 
