@@ -38,7 +38,7 @@
             </div>
         </div>
         <div class="jumbotron">
-            <div id="bookMovie">
+            <div id="ticket">
 
             </div>
         </div>
@@ -46,7 +46,7 @@
 
     <script>
 
-        let seats = new Array(100);
+        let selectedSeats = [];
         $(document).ready(() => {
             if (window.localStorage.getItem('token') === null) {
                 window.location.replace("login.html");
@@ -58,44 +58,7 @@
 
             const id = window.localStorage.getItem('show_id');
             if (id === null) return;
-            window.localStorage.removeItem('show_id');
             displaySeats(id);
-
-            // $("#ticketsForm").submit((e) => {
-            //     e.preventDefault();
-            //     $("#error").empty();
-
-            //     var $inputs = $('#ticketsForm :input');
-            //     var values = {};
-            //     $inputs.each(function () {
-            //         values[this.name] = $(this).val();
-            //     });
-
-            //     console.log(`Bearer ${window.localStorage.getItem('token')}`);
-
-            //     $.ajax({
-            //         type: 'POST',
-            //         beforeSend: (request) => {
-            //             request.setRequestHeader("Authorization", `Bearer ${window.localStorage.getItem('token')}`);
-            //         },
-            //         url: 'http://localhost:8000/api/booking',
-            //         data: JSON.stringify({
-            //             "show_id": id,
-            //             "tickets": values['numTickets']
-            //         }),
-            //         success: (data) => {
-            //             $('#myTicket').append(`<h2> Ticket Confirmed! ID - <b> ${data.booking_id} </b></h2>`);
-            //         },
-            //         error: (err) => {
-            //             console.log(err);
-            //             $('#error').append(`<div class="alert alert-danger" role="alert">
-            //                                     ${err.responseJSON.error}
-            //                                 </div>`);
-            //         },
-            //         contentType: "application/json",
-            //         dataType: 'json'
-            //     });
-            // });
         });
 
         displaySeats = (id) => {
@@ -107,27 +70,23 @@
                 },
                 url: `http://localhost:8000/api/seats/${id}`,
                 success: (data) => {
-                    booked = data.booked.split('');
-                    pending = data.pending.split('');
                     let parent = '';
-                    for (let i = 0; i < booked.length; i++) {
-                        if (i % 10 == 0) {
-                            if (i > 0) {
+                    for(let i=0; i<data.length; i++){
+                        if(i%10 == 0){
+                            if(i>0){
                                 parent += '</div><br>';
-                                $('#seats').append(parent);
+                                $('#seats').append(parent);   
                             }
                             parent = '<div class="row">';
                         }
-                        if (booked[i] == '1' || pending[i] == '1') {
+                        if(data[i].seat_no == i){
                             parent += ` <div class="col">
-                                            <button type="button" id="${i}" class="btn btn-outline-secondary active" width="2px" height="2px">${getSeatName(i)}</button>
+                                            <button type="button" id="${i}" class="btn btn-outline-secondary active" width="3px" height="3px">${getSeatName(i)}</button>
                                         </div>`;
-                            seats[i] = 1;
                         } else {
                             parent += ` <div class="col">
-                                            <button type="button" id="${i}"  onclick="selectSeat(${i})" class="btn btn-outline-danger" data-toggle="button" width="2px" height="2px">${getSeatName(i)}</button>
+                                            <button type="button" id="${i}"  onclick="selectSeat(${i})" class="btn btn-outline-danger" data-toggle="button" width="3px" height="3px">${getSeatName(i)}</button>
                                         </div>`;
-                            seats[i] = 0;
                         }
                     }
                     parent += '</div>';
@@ -142,24 +101,45 @@
         }
 
         getSeatName = (n) => {
-            let d = parseInt(n / 10);
+            let d = parseInt(n/10);
             let seat = '';
-            seat += (String.fromCharCode(65 + d));
-            let m = n % 10;
+            seat += (String.fromCharCode(65+d));
+            let m = n%10;
             seat += m;
             return seat;
         }
 
-        selectSeat = (i) => {
-            seats[i] = 1-seats[i];
+        selectSeat = (n) => {
+            let index = selectedSeats.indexOf(n);
+            if(index > -1){
+                selectedSeats.splice(index, 1);
+            }else{
+                selectedSeats.push(n);
+            }
         }
 
         bookSeats = (n) => {
-            let str = '';
-            for (let i = 0; i < seats.length; i++) {
-                str += seats[i];
-            }
-            
+            $.ajax({
+                type: 'POST',
+                beforeSend: (request) => {
+                    request.setRequestHeader("Authorization", `Bearer ${window.localStorage.getItem('token')}`);
+                },
+                url: `http://localhost:8000/api/seats/${id}`,
+                data: JSON.stringify({
+                    "selected_seats": selectedSeats,
+                    "show_id": window.localStorage.getItem('show_id')
+                }),
+                success: (data) => {
+                    $('#ticket').append(`${data}`);
+                },
+                error: (err) => {
+                    $('#error').append(`<div class="alert alert-success" role="alert">
+                                                Registration successful! Please login.
+                                            </div>`);
+                },
+                contentType: "application/json",
+                dataType: 'json'
+            });
         }
     </script>
 

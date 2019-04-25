@@ -60,42 +60,6 @@
             displayShow(id);
 
             $("#nextStep").append(`<button class="btn btn-outline-danger" id=${id} onclick="next(this.id)"> Next </button>`);
-
-            // $("#ticketsForm").submit((e) => {
-            //     e.preventDefault();
-            //     $("#error").empty();
-
-            //     var $inputs = $('#ticketsForm :input');
-            //     var values = {};
-            //     $inputs.each(function () {
-            //         values[this.name] = $(this).val();
-            //     });
-
-            //     console.log(`Bearer ${window.localStorage.getItem('token')}`);
-
-            //     $.ajax({
-            //         type: 'POST',
-            //         beforeSend: (request) => {
-            //             request.setRequestHeader("Authorization", `Bearer ${window.localStorage.getItem('token')}`);
-            //         },
-            //         url: 'http://localhost:8000/api/booking',
-            //         data: JSON.stringify({
-            //             "show_id": id,
-            //             "tickets": values['numTickets']
-            //         }),
-            //         success: (data) => {
-            //             $('#myTicket').append(`<h2> Ticket Confirmed! ID - <b> ${data.booking_id} </b></h2>`);
-            //         },
-            //         error: (err) => {
-            //             console.log(err);
-            //             $('#error').append(`<div class="alert alert-danger" role="alert">
-            //                                     ${err.responseJSON.error}
-            //                                 </div>`);
-            //         },
-            //         contentType: "application/json",
-            //         dataType: 'json'
-            //     });
-            // });
         });
 
         displayShow = (id) => {
