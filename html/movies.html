@@ -27,6 +27,12 @@
                 <li class="nav-item active"><a class="nav-link" href="movies.html" style="padding-right:50px">Movies</a>
                 </li>
             </ul>
+            <div>
+                <form class="form-inline" name="searchBar" id="searchBar" style="padding-right:50px">
+                    <input class="form-control mr-sm-2" name="search" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-danger my-2 my-sm-0" type="submit">Search</button>
+                </form>
+            </div>
         </div>
     </nav>
 
@@ -44,7 +50,13 @@
 
     <script>
         const getMovies = (page) => {
-            $.getJSON(`http://localhost:8000/api/movies?page=${page}`, (data) => {
+            let url;
+            if($.urlParam('search')){
+                url = `http://localhost:8000/api/movies?search=${$.urlParam('search')}&page=${page}`
+            }else{
+                url = `http://localhost:8000/api/movies?page=${page}`
+            }
+            $.getJSON(url, (data) => {
                 $("#movies").empty();
                 let parent = `<div class="row">`;
                 for (let i = 0; i < data.length; i++) {
@@ -83,16 +95,18 @@
                         parent += `</div>`;
                     }
                 }
+                
+                if(data.length == 0) return;
 
                 $("#movies").append(parent);
 
                 const rowCount = data[0].row_count || 0;
                 const numPages = Math.ceil(rowCount / 20);
-
+                
                 for (let i = 1; i <= numPages; i++) {
                     let pgNum = parseInt(i / 22);
                     pgNum++;
-                    if(i == (page+1)){
+                    if (i == (page + 1)) {
                         $(`#pg${pgNum}`).append(`<li class="page-item active"><a class="page-link" href="javascript:goToPage(${i});">${i}</a></li>`);
                     }
                     else $(`#pg${pgNum}`).append(`<li class="page-item"><a class="page-link" href="javascript:goToPage(${i});">${i}</a></li>`);
@@ -107,6 +121,16 @@
                 $('#navbarChild').append(`<li class="nav-item"><a class="nav-link" href="profile.html" style="padding-right:50px">Profile</a></li>`);
                 $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='logout.html';">Logout</button>`);
             }
+
+            $('#searchBar').submit((e) => {
+                var $inputs = $('#searchBar :input');
+                var values = {};
+                $inputs.each(function () {
+                    values[this.name] = $(this).val();
+                });
+                window.location.replace(`movies.html?search=${values['search']}`);
+            });
+
             const page = $.urlParam('page') || 1;
             getMovies(page - 1);
         });
@@ -118,7 +142,13 @@
         }
 
         goToPage = (page) => {
-            window.location.replace(`movies.html?page=${page}`);
+            let url = 'movies.html';
+            if ($.urlParam('search')) {
+                url += `?search=${$.urlParam('search')}&page=${page}`
+            } else {
+                url += `?page=${page}`
+            }
+            window.location.replace(url);
         }
 
         $.urlParam = (name) => {
