@@ -29,8 +29,6 @@
         </div>
     </nav>
 
-    <div id="error"></div>
-
     <div class="container">
         <div class="jumbotron">
             <h1 class="justify-content-center"> Select seats </h1>
@@ -38,9 +36,13 @@
             </div>
         </div>
         <div class="jumbotron">
-            <div id="ticket">
-
+            <div id="bookSeats">
+                <button class="btn btn-outline-danger" onclick="bookSeats()"> Pay </button>
             </div>
+        </div>
+
+        <div id="ticket">
+
         </div>
     </div>
 
@@ -54,7 +56,6 @@
 
             $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='logout.html';">Logout</button>`);
             $('#navbarChild').append(`<li class="nav-item"><a class="nav-link" href="profile.html" style="padding-right:50px">Profile</a></li>`);
-
 
             const id = window.localStorage.getItem('show_id');
             if (id === null) return;
@@ -71,15 +72,19 @@
                 url: `http://localhost:8000/api/seats/${id}`,
                 success: (data) => {
                     let parent = '';
-                    for(let i=0; i<data.length; i++){
-                        if(i%10 == 0){
-                            if(i>0){
+                    bookedSeats = [];
+                    for (let i = 0; i < data.length; i++) {
+                        bookedSeats.push(data[i].seat_no);
+                    }
+                    for (let i = 0; i < 100; i++) {
+                        if (i % 10 == 0) {
+                            if (i > 0) {
                                 parent += '</div><br>';
-                                $('#seats').append(parent);   
+                                $('#seats').append(parent);
                             }
                             parent = '<div class="row">';
                         }
-                        if(data[i].seat_no == i){
+                        if (bookedSeats.indexOf(i) > -1) {
                             parent += ` <div class="col">
                                             <button type="button" id="${i}" class="btn btn-outline-secondary active" width="3px" height="3px">${getSeatName(i)}</button>
                                         </div>`;
@@ -101,45 +106,54 @@
         }
 
         getSeatName = (n) => {
-            let d = parseInt(n/10);
+            let d = parseInt(n / 10);
             let seat = '';
-            seat += (String.fromCharCode(65+d));
-            let m = n%10;
+            seat += (String.fromCharCode(65 + d));
+            let m = n % 10;
             seat += m;
             return seat;
         }
 
         selectSeat = (n) => {
             let index = selectedSeats.indexOf(n);
-            if(index > -1){
+            if (index > -1) {
                 selectedSeats.splice(index, 1);
-            }else{
+            } else {
                 selectedSeats.push(n);
             }
         }
 
-        bookSeats = (n) => {
+        bookSeats = () => {
+            console.log(selectedSeats);
             $.ajax({
                 type: 'POST',
                 beforeSend: (request) => {
                     request.setRequestHeader("Authorization", `Bearer ${window.localStorage.getItem('token')}`);
                 },
-                url: `http://localhost:8000/api/seats/${id}`,
+                url: `http://localhost:8000/api/seats/`,
                 data: JSON.stringify({
                     "selected_seats": selectedSeats,
                     "show_id": window.localStorage.getItem('show_id')
                 }),
                 success: (data) => {
-                    $('#ticket').append(`${data}`);
+                    console.log(data);
+                    $('#ticket').append(`<div class="alert alert-success" role="alert">
+                            Ticked Confirmed - ${data.booking_id}
+                                            </div>`);
+                    for(let i=0; i<100; i++){
+                        $(`#${i}`).prop('disabled', true);
+                    }
                 },
                 error: (err) => {
-                    $('#error').append(`<div class="alert alert-success" role="alert">
-                                                Registration successful! Please login.
+                    console.log(err);
+                    $('#ticket').append(`<div class="alert alert-danger" role="alert">
+                            ${err.responseJSON.error}
                                             </div>`);
                 },
                 contentType: "application/json",
                 dataType: 'json'
             });
+            window.localStorage.removeItem('show_id');
         }
     </script>
 
