@@ -21,59 +21,132 @@
             <a class="navbar-brand" href="#">Zomovie</a>
         </div>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav mr-auto">
+            <ul class="navbar-nav mr-auto" id="navbarChild">
                 <li class="nav-item"><a class="nav-link" style="padding-right:50px" href="index.html">Home</a></li>
                 <li class="nav-item"><a class="nav-link" href="shows.html" style="padding-right:50px">Shows</a></li>
                 <li class="nav-item"><a class="nav-link" href="movies.html" style="padding-right:50px">Movies</a></li>
             </ul>
-            <button class="btn btn-danger navbar-btn pull-right" onclick="location.href='login.html';">Logout</button>
         </div>
     </nav>
-
     <div class="container">
         <div class="jumbotron">
-
-            <div id="alert"></div>
-
-            <div class="row">
-                <div class="col-6">
-                    <h2>Login</h2>
-                    <form>
-                        <div class="form-group">
-                            <label for="email">Email address: </label>
-                            <input type="email" class="form-control" id="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="pwd">Password: </label>
-                            <input type="password" class="form-control" id="pwd" required maxlength="20" minlength="5">
-                        </div>
-                        <div class="form-group form-check">
-                        </div>
-                        <button type="submit" class="btn btn-danger">Login</button>
-                    </form>
+            <div id="userDetails">
+                
+            </div>
+        </div>
+        <div class="jumbotron">
+            <div id="userHistory">
+                <h2> <b> History </b></h2>
+                <br>
+                <div class="row">
+                    <div class="col-5">
+                        <h4 class="text-center"> Booking ID </h4>
+                    </div>
+                    <div class="col-2">
+                        <h4 class="text-center"> Movie </h4>
+                    </div>
+                    <div class="col-2">
+                        <h4 class="text-center"> Number of Tickets </h4>
+                    </div>
+                    <div class="col-3">
+                        <h4 class="text-center"> Booking Date </h4>
+                    </div>
                 </div>
-                <div class="col-6">
-                    <h2>Register</h2>
-                    <form>
-                        <div class="form-group">
-                            <label for="email">Email address: </label>
-                            <input type="email" class="form-control" id="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="pwd">Password: </label>
-                            <input type="password" class="form-control" id="pwd" required maxlength="20" minlength="5">
-                        </div>
-                        <div class="form-group form-check">
-                        </div>
-                        <button type="submit" class="btn btn-danger">Register</button>
-                    </form>
-                </div>
+                <br>
             </div>
         </div>
     </div>
 
     <script>
-        
+        $(document).ready(() => {
+            if (window.localStorage.getItem('token') === null) {
+                window.location.replace("login.html");
+            }
+            $('#navbarChild').append(`<li class="nav-item active"><a class="nav-link" href="profile.html" style="padding-right:50px">Profile</a></li>`);
+            $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='logout.html';">Logout</button>`);
+
+            getUser();
+            getUserHistory();
+        });
+
+        getUser = () => {
+            $.ajax({
+                type: 'GET',
+                beforeSend: (request) => {
+                    request.setRequestHeader("Authorization", `Bearer ${window.localStorage.getItem('token')}`);
+                },
+                url: 'http://localhost:8000/api/profile',
+                success: (data) => {
+                    console.log(data);
+                    let date = new Date(data.birth_date);
+                    $('#userDetails').append(`<div class="row">
+                                                <div class="col">
+                                                    <h4 class="text-center"> Name: </h4>
+                                                </div>
+                                                <div class="col">
+                                                    <h4 class="text-center"><b> ${data.first_name} ${data.last_name} </b> </h4>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col">
+                                                    <h4 class="text-center"> Email ID: </h4>
+                                                </div>
+                                                <div class="col">
+                                                    <h4 class="text-center"><b> r${data.email} </b> </h4>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col">
+                                                    <h4 class="text-center"> Date of Birth: </h4>
+                                                </div>
+                                                <div class="col">
+                                                    <h4 class="text-center"><b> ${date.toLocaleDateString()} </b> </h4>
+                                                </div>
+                                            </div>`);
+                },
+                error: (err) => {
+                    console.log(err);
+                },
+                contentType: "application/json",
+                dataType: 'json'
+            });
+        }
+
+        getUserHistory = () => {
+            $.ajax({
+                type: 'GET',
+                beforeSend: (request) => {
+                    request.setRequestHeader("Authorization", `Bearer ${window.localStorage.getItem('token')}`);
+                },
+                url: 'http://localhost:8000/api/profile/history',
+                success: (data) => {
+                    console.log(data);
+                    for (let i = 0; i < data.length; i++) {
+                        let time = new Date(data[i].booking_time);
+                        $('#userHistory').append(`<div class="row">
+                                                <div class="col-5">
+                                                    <h6 class="text-center"> ${data[i].id} </h6>
+                                                </div>
+                                                <div class="col-2">
+                                                    <h6 class="text-center"> ${data[i].movie} </h6>
+                                                </div>
+                                                <div class="col-2">
+                                                    <h6 class="text-center"> ${data[i].count_tickets} </h6>
+                                                </div>
+                                                <div class="col-3">
+                                                    <h6 class="text-center"> ${time.toLocaleString()} </h6>
+                                                </div>
+                                            </div>`);
+                    }
+                },
+                error: (err) => {
+                    console.log(err);
+                },
+                contentType: "application/json",
+                dataType: 'json'
+            });
+        }
+
     </script>
 
 </body>

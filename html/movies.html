@@ -21,8 +21,8 @@
             <a class="navbar-brand" href="#">Zomovie</a>
         </div>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item"><a class="nav-link" style="padding-right:50px" href="index.html">Home</a></li>
+            <ul class="navbar-nav mr-auto" id="navbarChild">
+                <li class="nav-item"><a class="nav-link" style="padding-right:50px;" href="index.html">Home</a></li>
                 <li class="nav-item"><a class="nav-link" href="shows.html" style="padding-right:50px">Shows</a></li>
                 <li class="nav-item active"><a class="nav-link" href="movies.html" style="padding-right:50px">Movies</a>
                 </li>
@@ -36,15 +36,16 @@
             </div>
         </div>
 
-        <ul class="pagination justify-content-center"></ul>
+
+        <ul class="pagination justify-content-center" id="pg1"></ul>
+        <ul class="pagination justify-content-center" id="pg2"></ul>
+        <ul class="pagination justify-content-center" id="pg3"></ul>
     </div>
 
     <script>
-        let page = 0;
-        const getMovies = () => {
+        const getMovies = (page) => {
             $.getJSON(`http://localhost:8000/api/movies?page=${page}`, (data) => {
                 $("#movies").empty();
-                $(".pagination").empty();
                 let parent = `<div class="row">`;
                 for (let i = 0; i < data.length; i++) {
 
@@ -63,16 +64,19 @@
                         ratingString += '<span class="fa fa-star-empty"></span>';
                     }
                     const html = `<div class="col">
-                                    <div class="card">
-                                        <img class="card-img-top d-flex align-items-stretch" src="${data[i].poster_url}" alt="Card image cap">
+                                    <div class="card" style="width:175px; height:425px;">
+                                        <div style="width:173px; height:250px;">
+                                            <img class="card-img-top" style="max-width:100%; max-height:100%;" src="${data[i].poster_url}" onerror="this.src='../images/image_not_found.png';">
+                                        </div>
                                         <div class="card-body text-center">
-                                            <h6 class="card-title">${data[i].name}</h6>
+                                            <h6 class="card-title" style="height:75px; overflow:hidden;">${data[i].name}</h6>
                                             <div class="rating">
                                                 ${ratingString}
                                             </div>
                                             <a href="javascript:goToTheMovie(${data[i].id})" class="btn btn-danger" id="${data[i].id}">Book</a>
                                         </div>
                                     </div>
+                                    <br>
                                 </div>`;
                     parent += html;
                     if (i == data.length - 1) {
@@ -82,12 +86,16 @@
 
                 $("#movies").append(parent);
 
-                if (page == 0) {
-                    $(".pagination").append(`<li class="page-item disabled"><a class="page-link" href="javascript:getPreviousPage();"> Previous </a></li>
-                                         <li class="page-item"><a class="page-link" href="javascript:getNextPage();">Next</a></li>`);
-                } else {
-                    $(".pagination").append(`<li class="page-item"><a class="page-link" href="javascript:getPreviousPage();"> Previous </a></li>
-                                         <li class="page-item"><a class="page-link" href="javascript:getNextPage();">Next</a></li>`);
+                const rowCount = data[0].row_count || 0;
+                const numPages = Math.ceil(rowCount / 20);
+
+                for (let i = 1; i <= numPages; i++) {
+                    let pgNum = parseInt(i / 22);
+                    pgNum++;
+                    if(i == (page+1)){
+                        $(`#pg${pgNum}`).append(`<li class="page-item active"><a class="page-link" href="javascript:goToPage(${i});">${i}</a></li>`);
+                    }
+                    else $(`#pg${pgNum}`).append(`<li class="page-item"><a class="page-link" href="javascript:goToPage(${i});">${i}</a></li>`);
                 }
             });
         }
@@ -96,9 +104,11 @@
             if (window.localStorage.getItem('token') === null) {
                 $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='login.html';">Login / Register</button>`);
             } else {
+                $('#navbarChild').append(`<li class="nav-item"><a class="nav-link" href="profile.html" style="padding-right:50px">Profile</a></li>`);
                 $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='logout.html';">Logout</button>`);
             }
-            getMovies();
+            const page = $.urlParam('page') || 1;
+            getMovies(page - 1);
         });
 
         goToTheMovie = (id) => {
@@ -107,14 +117,15 @@
             window.location.replace("movie.html");
         }
 
-        getNextPage = () => {
-            page++;
-            console.log(page);
-            getMovies();
+        goToPage = (page) => {
+            window.location.replace(`movies.html?page=${page}`);
         }
-        getPreviousPage = () => {
-            page--;
-            getMovies();
+
+        $.urlParam = (name) => {
+            var results = new RegExp('[\?&]' + name + '=([^&#]*)')
+                .exec(window.location.search);
+
+            return (results !== null) ? results[1] || 0 : false;
         }
     </script>
 

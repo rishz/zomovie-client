@@ -21,12 +21,11 @@
             <a class="navbar-brand" href="#">Zomovie</a>
         </div>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav mr-auto">
+            <ul class="navbar-nav mr-auto" id="navbarChild">
                 <li class="nav-item"><a class="nav-link" style="padding-right:50px" href="index.html">Home</a></li>
                 <li class="nav-item"><a class="nav-link" href="shows.html" style="padding-right:50px">Shows</a></li>
                 <li class="nav-item"><a class="nav-link" href="movies.html" style="padding-right:50px">Movies</a></li>
             </ul>
-            <button class="btn btn-danger navbar-btn pull-right" href="login.html">Login / Register</button>
         </div>
     </nav>
 
@@ -37,6 +36,7 @@
     <script>
         $(document).ready(() => {
             window.localStorage.removeItem('token');
+            $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='login.html';">Login / Register</button>`);
             $("#status").append(`<div class="alert alert-info" role="alert">
                                         You have been logged out successfully.
                                 </div>`);
