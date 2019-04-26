@@ -126,7 +126,7 @@
                     }),
                     success: (data) => {
                         window.localStorage.setItem('token', data.token);
-                        window.location.replace("index.html");
+                        window.location.replace("movies.html");
                     },
                     error: (err) => {
                         $('#error').append(`<div class="alert alert-danger" role="alert">

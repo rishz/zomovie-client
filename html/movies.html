@@ -27,7 +27,8 @@
             </ul>
             <div>
                 <form class="form-inline" name="searchBar" id="searchBar" style="padding-right:50px">
-                    <input class="form-control mr-sm-2" name="search" id="search" type="search" placeholder="Search" aria-label="Search">
+                    <input class="form-control mr-sm-2" name="search" id="search" type="search" placeholder="Search"
+                        aria-label="Search">
                     <button class="btn btn-outline-danger my-2 my-sm-0" type="submit">Search</button>
                 </form>
             </div>
@@ -49,9 +50,9 @@
     <script>
         const getMovies = (page) => {
             let url;
-            if($.urlParam('search')){
+            if ($.urlParam('search')) {
                 url = `http://localhost:8000/api/movies?search=${$.urlParam('search')}&page=${page}`
-            }else{
+            } else {
                 url = `http://localhost:8000/api/movies?page=${page}`
             }
             $.getJSON(url, (data) => {
@@ -89,18 +90,24 @@
                                     <br>
                                 </div>`;
                     parent += html;
-                    if (i == data.length - 1) {
-                        parent += `</div>`;
-                    }
                 }
 
-                if(data.length == 0) return;
+                if (data.length == 0){
+                    $("#movies").append('<h2 class="justify-content-center"> No results </h2>')
+                    return;
+                }
+
+                for (let i = 0; i < 5 - (data.length % 5); i++) {
+                    const html = `<div class="col"></div>`;
+                    parent += html;
+                }
+                parent += `</div>`;
 
                 $("#movies").append(parent);
 
                 const rowCount = data[0].row_count || 0;
                 const numPages = Math.ceil(rowCount / 20);
-                
+
                 for (let i = 1; i <= numPages; i++) {
                     let pgNum = parseInt(i / 22);
                     pgNum++;
@@ -120,12 +127,12 @@
                 $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='logout.html';">Logout</button>`);
             }
 
-            if(window.localStorage.getItem('search') !== null){
+            if (window.localStorage.getItem('search') !== null) {
                 console.log(window.localStorage.getItem('search'));
                 $('#search').val(window.localStorage.getItem('search'));
                 window.localStorage.removeItem('search');
             }
-            
+
             $('#searchBar').submit((e) => {
                 var $inputs = $('#searchBar :input');
                 var values = {};
