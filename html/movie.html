@@ -22,10 +22,15 @@
         </div>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mr-auto" id="navbarChild">
-                <li class="nav-item"><a class="nav-link" style="padding-right:50px" href="index.html">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="shows.html" style="padding-right:50px">Shows</a></li>
                 <li class="nav-item"><a class="nav-link" href="movies.html" style="padding-right:50px">Movies</a></li>
             </ul>
+            <div>
+                <form class="form-inline" name="searchBar" id="searchBar" style="padding-right:50px">
+                    <input class="form-control mr-sm-2" name="search" id="search" type="search" placeholder="Search"
+                        aria-label="Search">
+                    <button class="btn btn-outline-danger my-2 my-sm-0" type="submit">Search</button>
+                </form>
+            </div>
         </div>
     </nav>
 
@@ -46,6 +51,23 @@
                 $('#navbarChild').append(`<li class="nav-item"><a class="nav-link" href="profile.html" style="padding-right:50px">Profile</a></li>`);
                 $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='logout.html';">Logout</button>`);
             }
+
+            if (window.localStorage.getItem('search') !== null) {
+                console.log(window.localStorage.getItem('search'));
+                $('#search').val(window.localStorage.getItem('search'));
+                window.localStorage.removeItem('search');
+            }
+
+            $('#searchBar').submit((e) => {
+                var $inputs = $('#searchBar :input');
+                var values = {};
+                $inputs.each(function () {
+                    values[this.name] = $(this).val();
+                });
+                window.localStorage.setItem('search', values['search']);
+                window.location.replace(`movies.html?search=${values['search']}`);
+                return false;
+            });
 
             const id = window.localStorage.getItem('movie_id');
             window.localStorage.removeItem('movie_id');
