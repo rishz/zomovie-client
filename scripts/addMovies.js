@@ -82,21 +82,21 @@ const getMoviesUrl = (page) => {
     return `https://api.themoviedb.org/3/movie/now_playing?api_key=${API_KEY}&language=en-US&page=${page}`;
 }
 
-const doIt = async (page) => {
-    ids = [];
-    await makeRequestMovies(getMoviesUrl(page));
-    console.log(ids);
-    for (let i = 0; i < ids.length; i++) {
-        // await timeout(100);
-        console.log("doing");
-        try {
-            await getMovie(ids[i]);
-            console.log('++');
-        } catch (err) { continue; };
+module.exports = {
+    addMovies = async (page) => {
+        ids = [];
+        await makeRequestMovies(getMoviesUrl(page));
+        console.log(ids);
+        for (let i = 0; i < ids.length; i++) {
+            // await timeout(100);
+            console.log("doing");
+            try {
+                await getMovie(ids[i]);
+                console.log('++');
+            } catch (err) { continue; };
+        }
+        await addMovies(page + 1);
     }
-    await doIt(page+1);   
 }
-doIt(5);
-// makeRequestMovies(moviesUrl)
-//     .then((ids) => {console.log(ids)})
-//     .catch(err => console.log(err));
+
+addMovies(1);
