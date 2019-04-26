@@ -22,7 +22,16 @@
         </div>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mr-auto" id="navbarChild">
-                <li class="nav-item active"><a class="nav-link" href="movies.html" style="padding-right:50px">Movies</a>
+                <li class="nav-item dropdown active">
+                    <a class="nav-link dropdown-toggle" href="movies.html" id="navbarDropdownMenuLink"
+                        style="padding-right:50px" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Movies
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink" id="genres">
+                        <a class="dropdown-item" href="#">Action</a>
+                        <a class="dropdown-item" href="#">Another action</a>
+                        <a class="dropdown-item" href="#">Something else here</a>
+                    </div>
                 </li>
             </ul>
             <div>
@@ -41,7 +50,6 @@
             </div>
         </div>
 
-
         <ul class="pagination justify-content-center" id="pg1"></ul>
         <ul class="pagination justify-content-center" id="pg2"></ul>
         <ul class="pagination justify-content-center" id="pg3"></ul>
@@ -54,6 +62,9 @@
                 url = `http://localhost:8000/api/movies?search=${$.urlParam('search')}&page=${page}`
             } else {
                 url = `http://localhost:8000/api/movies?page=${page}`
+            }
+            if ($.urlParam('genre')) {
+                url += `&genre=${$.urlParam('genre')}`;
             }
             $.getJSON(url, (data) => {
                 $("#movies").empty();
@@ -92,7 +103,7 @@
                     parent += html;
                 }
 
-                if (data.length == 0){
+                if (data.length == 0) {
                     $("#movies").append('<h2 class="justify-content-center"> No results </h2>')
                     return;
                 }
@@ -144,8 +155,25 @@
             });
 
             const page = $.urlParam('page') || 1;
+            getGenres();
             getMovies(page - 1);
         });
+
+        getGenres = () => {
+            $.getJSON('http://localhost:8000/api/genres', (data) => {
+                $("#genres").empty();
+                for (let i = 0; i < data.length; i++) {
+                    const html = `<a class="dropdown-item" href="javascript:goToGenre(${data[i].id});">${data[i].name}</a>`;
+                    $("#genres").append(html);
+                }
+            });
+        }
+
+        goToGenre = (id) => {
+            console.log(id);
+            let url = `movies.html?genre=${id}`;
+            window.location.replace(url);
+        }
 
         goToTheMovie = (id) => {
             console.log(id);
@@ -160,6 +188,11 @@
             } else {
                 url += `?page=${page}`
             }
+
+            if ($.urlParam('genre')) {
+                url += `&genre=${$.urlParam('genre')}`;
+            }
+
             window.location.replace(url);
         }
 
