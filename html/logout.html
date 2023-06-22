@@ -43,7 +43,8 @@
                 window.localStorage.removeItem('token');
                 $('#navbarNav').append(`<button class="btn btn-danger navbar-btn pull-right" onclick="location.href='login.html';">Login / Register</button>`);
                 $("#status").append(`<div class="alert alert-info" role="alert">
-                                        You have been logged out successfully.
+                                        You have been logged out successfully,
+                                        Thank You.
                                 </div>`);
                 if (window.localStorage.getItem('search') !== null) {
                     console.log(window.localStorage.getItem('search'));
